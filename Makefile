@@ -17,6 +17,11 @@ endif
 ifeq ($(UNAME_S),Linux)
     CFLAGS += -I/usr/include/tirpc
     LDFLAGS = -ltirpc
+    SED_INPLACE = sed -i
+endif
+
+ifeq ($(UNAME_S),Darwin)
+    SED_INPLACE = sed -i ''
 endif
 
 X_FILE       = $(SRC_DIR)/filemanager.x
@@ -39,12 +44,15 @@ dirs:
 
 $(GEN_H): $(X_FILE) | dirs
 	$(RPCGEN) -h $< -o $@
+	$(SED_INPLACE) 's|"src/filemanager.h"|"filemanager.h"|g' $@
 
 $(GEN_XDR): $(X_FILE) | dirs
 	$(RPCGEN) -c $< -o $@
+	$(SED_INPLACE) 's|"src/filemanager.h"|"filemanager.h"|g' $@
 
 $(GEN_SVC): $(X_FILE) | dirs
 	$(RPCGEN) -m $< -o $@
+	$(SED_INPLACE) 's|"src/filemanager.h"|"filemanager.h"|g' $@
 
 $(SERVER_BIN): $(GEN_SVC) $(GEN_XDR) $(GEN_H) $(SRV_SRC) $(SRV_STUB_SRC)
 	$(CC) $(CFLAGS) -o $@ $(GEN_SVC) $(SRV_SRC) $(SRV_STUB_SRC) $(GEN_XDR) $(LDFLAGS)
